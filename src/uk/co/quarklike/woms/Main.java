@@ -62,8 +62,8 @@ public class Main implements Runnable {
 
 		particles = new ArrayList<Particle>();
 
-		Particle p1 = addParticle(10, 10, -100, 0);
-		Particle p2 = addParticle(10, 10, 100, 0);
+		Particle p1 = addParticle(5, 5, -100, 0);
+		Particle p2 = addParticle(10, 10, 0, 0);
 
 		// for (int i = 0; i < 100; i++) {
 		// float randX = rand.nextInt(799) - 400 + rand.nextFloat();

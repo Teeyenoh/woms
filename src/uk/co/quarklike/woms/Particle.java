@@ -33,27 +33,39 @@ public class Particle {
 					float mass2 = p.getMass();
 					float v1x = this.getVelocity().getX();
 					float v1y = this.getVelocity().getY();
-					float v1 = this.getVelocity().length();
 					float v2x = p.getVelocity().getX();
 					float v2y = p.getVelocity().getY();
-					float v2 = p.getVelocity().length();
 
-					double angleOfNormal = (new Vector2f(p.getX() - getX(), p.getY() - getY())).getPerpendicular().getNormal().getTheta();
-					double alpha = angleOfNormal + (angleOfNormal - this.getVelocity().getTheta());
-					double beta = angleOfNormal + (angleOfNormal - p.getVelocity().getTheta());
+					Vector2f normal1 = (new Vector2f(p.getX() - getX(), p.getY() - getY())).getPerpendicular().getNormal();
+					Vector2f normal2 = (new Vector2f(getX() - p.getX(), getY() - p.getY())).getPerpendicular().getNormal();
+					Vector2f i1 = this.getVelocity().getNormal();
+					Vector2f i2 = p.getVelocity().getNormal();
+					Vector2f alphaVec = normal1.scale(2 * normal1.dot(i1)).sub(i1);
+					Vector2f betaVec = normal2.scale(2 * normal2.dot(i2)).sub(i2);
+					double alpha = Math.toRadians(alphaVec.getTheta());
+					double beta = Math.toRadians(betaVec.getTheta());
 
-					float a = (mass1 * v1x) + (mass2 * v2x);
-					float b = (mass1 * v1y) + (mass2 * v2y);
+					float a = mass1 * v1x;
+					float b = mass2 * v2x;
 					float c = mass1 * (float) Math.cos(alpha);
-					float d = mass1 * (float) Math.sin(alpha);
-					float e = mass2 * (float) Math.cos(beta);
-					float f = mass2 * (float) Math.sin(beta);
+					float d = mass2 * (float) Math.cos(beta);
+					float e = mass1 * v1y;
+					float f = mass2 * v2y;
+					float g = mass1 * (float) Math.sin(alpha);
+					float h = mass2 * (float) Math.sin(beta);
 
-					float v2f = (b * c - d * a) / (c * f - d * e);
-					float v1f = (a - e * v2f) / d;
+					System.out.println("A: " + a + " B: " + b + " C: " + c + " D: " + d);
+					System.out.println("E: " + e + " F: " + f + " G: " + g + " H: " + h);
 
-					this.setVelocity(new Vector2f(alpha).scale(v1f));
-					p.setVelocity(new Vector2f(beta).scale(v2f));
+					System.out.println("Alpha: " + Math.toDegrees(alpha) + " Beta: " + Math.toDegrees(beta));
+
+					float v1f = ((d * e) + (d * f) - (h * a) - (h * b)) / ((d * g) - (h * c));
+					float v2f = (a + b - (c * v1f)) / d;
+
+					System.out.println("V1f: " + v1f + " V2f: " + v2f);
+
+					this.setVelocity(alphaVec.scale(v1f));
+					p.setVelocity(betaVec.scale(v2f));
 
 					this.collidedWith.add(p);
 				}
@@ -61,6 +73,18 @@ public class Particle {
 
 		velocity.add(acceleration);
 		position.add(velocity);
+
+		for (Particle p : particles) {
+			if (!p.equals(this))
+				if (this.isColliding(p)) {
+					float distance = p.getPosition().sub(this.getPosition()).length();
+					float radii = this.getRadius() + p.getRadius();
+					float left = radii - distance;
+
+					Vector2f back = p.getPosition().sub(this.getPosition()).getNormal().scale(left);
+					this.setPosition(getPosition().add(back));
+				}
+		}
 	}
 
 	public void applyForce(Vector2f force) {
