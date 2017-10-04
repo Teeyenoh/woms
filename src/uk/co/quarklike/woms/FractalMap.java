@@ -13,21 +13,26 @@ public class FractalMap {
 			}
 		}
 
-		int max = 255;
+		int max = 129;
 		int range = max / 2;
+		int passes = 50;
 
-		for (int i = 1; i < 12; i++) {
+		for (int i = 1; i <= passes; i++) {
 			System.out.println("Diamond");
 			heights = diamond(heights, size, i, range);
 			System.out.println("Square");
 			heights = square(heights, size, i, range);
 			range *= Math.pow(2, -roughness);
+			System.out.println("New range: " + (-range) + " to " + range);
 		}
 
 		return heights;
 	}
 
 	private static int[][] diamond(int[][] values, int size, int pass, int range) {
+		if (range <= 0)
+			range = 1;
+		
 		int[][] out = values;
 
 		int d = (size - 1) / pass;
@@ -55,6 +60,9 @@ public class FractalMap {
 	}
 
 	private static int[][] square(int[][] values, int size, int pass, int range) {
+		if (range <= 0)
+			range = 1;
+		
 		int[][] out = values;
 
 		int d = (size - 1) / pass;

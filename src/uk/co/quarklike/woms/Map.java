@@ -10,7 +10,7 @@ public class Map {
 	public Map(int width, int height) {
 		this.width = width;
 		this.height = height;
-		this.tiles = FractalMap.generateMap(width, 127, 0.5f);
+		this.tiles = FractalMap.generateMap(width, 127, 0.9f);
 		this.entities = new ArrayList<Entity>();
 	}
 

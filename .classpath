@@ -9,6 +9,5 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/slick.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/QMath"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
