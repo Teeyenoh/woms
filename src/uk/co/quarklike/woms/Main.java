@@ -3,16 +3,27 @@ package uk.co.quarklike.woms;
 import static org.lwjgl.opengl.GL11.*;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Random;
 
 import org.lwjgl.LWJGLException;
-import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
-import org.newdawn.slick.geom.Vector2f;
+import org.newdawn.slick.ImageBuffer;
 
 public class Main implements Runnable {
+	public static final double FEMTO = Math.pow(10, -15);
+	public static final double PICO = Math.pow(10, -12);
+	public static final double NANO = Math.pow(10, -9);
+	public static final double MICRO = Math.pow(10, -6);
+	public static final double MILI = Math.pow(10, -3);
+	public static final double KILO = Math.pow(10, 3);
+	public static final double MEGA = Math.pow(10, 6);
+	public static final double GIGA = Math.pow(10, 9);
+	public static final double TERA = Math.pow(10, 12);
+	public static final double PETA = Math.pow(10, 15);
+
+	public static final int WINDOW_WIDTH = 800;
+	public static final int WINDOW_HEIGHT = 600;
 	public static final String TITLE = "The World on Michael's Skin";
 
 	public static Main instance;
@@ -20,17 +31,20 @@ public class Main implements Runnable {
 	public static NumberFormat nf;
 	{
 		nf = NumberFormat.getInstance();
-		nf.setMinimumFractionDigits(3);
-		nf.setMaximumFractionDigits(3);
+		nf.setMinimumFractionDigits(2);
+		nf.setMaximumFractionDigits(2);
 	}
 
 	private Thread thread;
+	private Listener listener;
 	private boolean running;
 	private Random rand;
 
-	private float scale = 1.0f;
-	private float scrollSpeed = 2.0f;
-	private ArrayList<Particle> particles;
+	private ImageBuffer canvas;
+
+	private Map map;
+	private String tracking;
+	private int cameraX, cameraY;
 
 	@Override
 	public void run() {
@@ -44,8 +58,10 @@ public class Main implements Runnable {
 	}
 
 	public void init() {
+		rand = new Random();
+
 		try {
-			Display.setDisplayMode(new DisplayMode(800, 600));
+			Display.setDisplayMode(new DisplayMode(WINDOW_WIDTH, WINDOW_HEIGHT));
 			Display.setTitle(TITLE);
 			Display.create();
 		} catch (LWJGLException e) {
@@ -54,93 +70,101 @@ public class Main implements Runnable {
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(-400, 400, -300, 300, 1, -1);
+		glOrtho(-WINDOW_WIDTH / 2, WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2, WINDOW_HEIGHT / 2, 1, -1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
-		rand = new Random();
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		particles = new ArrayList<Particle>();
+		canvas = new ImageBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		Particle p1 = addParticle(5, 5, -100, 0);
-		Particle p2 = addParticle(10, 10, 0, 0);
+		map = new Map(513, 513);
 
-		// for (int i = 0; i < 100; i++) {
-		// float randX = rand.nextInt(799) - 400 + rand.nextFloat();
-		// float randY = rand.nextInt(599) - 300 + rand.nextFloat();
-		// float randRadius = rand.nextInt(99) + rand.nextFloat();
-		// addParticle(10, randRadius, randX, randY);
-		// }
-
-		p1.setVelocity(new Vector2f(1, 0));
-		p2.setVelocity(new Vector2f(0, 0));
+		Entity e = new Entity("Test", 4);
+		e.setPosition(256, 256);
+		map.addEntity(e);
 	}
 
-	public Particle addParticle(float mass, float radius, float initialX, float initialY) {
-		if (!isOpen(initialX, initialY, radius))
-			return null;
-
-		Particle p = new Particle(mass, radius);
-		p.setPosition(new Vector2f(initialX, initialY));
-
-		particles.add(p);
-		return p;
-	}
-
-	public boolean isOpen(float x, float y, float radius) {
-		Vector2f position = new Vector2f(x, y);
-
-		for (Particle p : particles) {
-			if (p.getPosition().distance(position) < radius + p.getRadius()) {
-				return false;
+	public Entity getEntity(String name) {
+		for (Entity e : map.getEntities()) {
+			if (e.getName().equals(name)) {
+				return e;
 			}
 		}
 
-		return true;
+		return null;
 	}
 
 	public void update() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		for (int i = 0; i < WINDOW_WIDTH; i++) {
+			for (int j = 0; j < WINDOW_HEIGHT; j++) {
+				canvas.setRGBA(i, j, 0, 0, 0, 0);
+			}
+		}
+
 		if (Display.isCloseRequested())
 			stop();
 
-		float dWheel = Mouse.getDWheel();
-		if (dWheel < 0) {
-			scale /= scrollSpeed;
-		} else if (dWheel > 0) {
-			scale *= scrollSpeed;
+		for (int i = cameraX; i < cameraX + map.getWidth(); i++) {
+			for (int j = cameraY; j < cameraY + map.getHeight(); j++) {
+				if (i >= 0 && i < WINDOW_WIDTH && j >= 0 && j < WINDOW_HEIGHT)
+					canvas.setRGBA(i - cameraX, j - cameraY, map.getTile(i - cameraX, j - cameraY), map.getTile(i - cameraX, j - cameraY), map.getTile(i - cameraX, j - cameraY), 255);
+			}
 		}
 
-		for (Particle p : particles) {
-			p.update(particles);
-			drawCircle(p.getX() * scale, p.getY() * scale, p.getRadius() * scale);
+		for (Entity e : map.getEntities()) {
+			e.update();
+			for (int i = 0; i < e.getSize(); i++) {
+				for (int j = 0; j < e.getSize(); j++) {
+					int x = e.getX() + i - cameraX;
+					int y = e.getY() + j - cameraY;
+
+					if (x >= 0 && x < WINDOW_WIDTH && y >= 0 && y < WINDOW_HEIGHT)
+						canvas.setRGBA(x, y, 127, 31, 31, 255);
+				}
+			}
 		}
+
+		canvas.getImage().drawCentered(0, 0);
 
 		Display.update();
 		Display.sync(60);
 	}
 
-	public void drawCircle(float x, float y, float radius) {
-		glTranslatef(x, y, 0);
+	public synchronized void setTracking(String name) {
+		this.tracking = name;
+	}
 
-		glBegin(GL_LINE_LOOP);
+	public int getCameraX() {
+		return this.cameraX;
+	}
 
-		int sides = 36;
-		int resolution = 360 / sides;
+	public int getCameraY() {
+		return this.cameraY;
+	}
 
-		for (int i = 0; i < 360; i += resolution) {
-			float angle = (float) (i * (Math.PI / 180));
-			glVertex2f((float) Math.cos(angle) * radius, (float) Math.sin(angle) * radius);
-		}
-
-		glEnd();
-
-		glTranslatef(-x, -y, 0);
+	public synchronized void setCamera(int x, int y) {
+		this.cameraX = x;
+		this.cameraY = y;
 	}
 
 	public void deinit() {
+		try {
+			canvas.getImage().destroy();
+			Display.destroy();
+		} catch (Exception e) {
+			System.out.println("Error closing program");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+	}
 
+	public Random getRandom() {
+		return rand;
 	}
 
 	private synchronized void start() {
@@ -150,6 +174,8 @@ public class Main implements Runnable {
 		running = true;
 		thread = new Thread(this, TITLE);
 		thread.start();
+		listener = new Listener();
+		listener.start();
 	}
 
 	synchronized void stop() {
@@ -158,6 +184,7 @@ public class Main implements Runnable {
 
 		running = false;
 		thread.interrupt();
+		listener.stop();
 	}
 
 	public static final void main(String[] args) {
