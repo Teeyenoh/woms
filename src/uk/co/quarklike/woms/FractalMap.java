@@ -1,9 +1,14 @@
 package uk.co.quarklike.woms;
 
 public class FractalMap {
-	public static int[][] generateMap(int size, int base, float roughness) {
+	private static int max, min;
+
+	public static int[][] generateMap(int size, int min, int base, int max, float roughness) {
 		int width = size;
 		int height = size;
+
+		FractalMap.max = max;
+		FractalMap.min = min;
 
 		int[][] heights = new int[width][height];
 
@@ -13,30 +18,30 @@ public class FractalMap {
 			}
 		}
 
-		int max = 129;
-		int range = max / 2;
-		int passes = 50;
+		int lower = base - min;
+		int upper = max - base;
+		int passes = 8;
 
 		for (int i = 1; i <= passes; i++) {
-			System.out.println("Diamond");
-			heights = diamond(heights, size, i, range);
-			System.out.println("Square");
-			heights = square(heights, size, i, range);
-			range *= Math.pow(2, -roughness);
-			System.out.println("New range: " + (-range) + " to " + range);
+			heights = diamond(heights, size, i, lower, upper);
+			heights = square(heights, size, i, lower, upper);
+			lower *= Math.pow(2, -roughness);
+			upper *= Math.pow(2, -roughness);
 		}
 
 		return heights;
 	}
 
-	private static int[][] diamond(int[][] values, int size, int pass, int range) {
-		if (range <= 0)
-			range = 1;
-		
+	private static int[][] diamond(int[][] values, int size, int pass, int lower, int upper) {
+		if (upper <= 0)
+			upper = 1;
+
+		if (lower <= 0)
+			lower = 1;
+
 		int[][] out = values;
 
-		int d = (size - 1) / pass;
-		System.out.println("Pass " + pass + ", d = " + d);
+		int d = (size - 1) / (int) Math.pow(2, pass);
 
 		for (int i = 0; i <= size; i += d) {
 			for (int j = 0; j <= size; j += d) {
@@ -46,7 +51,8 @@ public class FractalMap {
 				int bl = getValue(out, i, j + d);
 
 				int average = (tl + tr + br + bl) / 4;
-				int random = Main.instance.getRandom().nextInt(2 * range) - range;
+				int random = Main.instance.getRandom().nextInt(upper + lower) - lower;
+				System.out.println(random);
 				int value = average + random;
 
 				int midX = i + (d / 2);
@@ -59,23 +65,26 @@ public class FractalMap {
 		return out;
 	}
 
-	private static int[][] square(int[][] values, int size, int pass, int range) {
-		if (range <= 0)
-			range = 1;
-		
+	private static int[][] square(int[][] values, int size, int pass, int lower, int upper) {
+		if (upper <= 0)
+			upper = 1;
+
+		if (lower <= 0)
+			lower = 1;
+
 		int[][] out = values;
 
-		int d = (size - 1) / pass;
+		int d = (size - 1) / (int) Math.pow(2, pass);
 
-		for (int i = 0; i <= size; i += d) {
-			for (int j = 0; j <= size; j += d) {
+		for (int i = 0; i < size; i += d) {
+			for (int j = 0; j < size; j += d) {
 				int l = getValue(out, i, j);
 				int t = getValue(out, i + (d / 2), j + (d / 2));
 				int r = getValue(out, i + d, j);
 				int b = getValue(out, i + (d / 2), j - (d / 2));
 
 				int average = (l + t + r + b) / 4;
-				int random = Main.instance.getRandom().nextInt(2 * range) - range;
+				int random = Main.instance.getRandom().nextInt(upper + lower) - lower;
 				int value = average + random;
 
 				int midX = i + (d / 2);
@@ -85,15 +94,15 @@ public class FractalMap {
 			}
 		}
 
-		for (int i = d / 2; i <= size; i += d) {
-			for (int j = d / 2; j <= size; j += d) {
+		for (int i = d / 2; i < size; i += d) {
+			for (int j = d / 2; j < size; j += d) {
 				int l = getValue(out, i, j);
 				int t = getValue(out, i + (d / 2), j + (d / 2));
 				int r = getValue(out, i + d, j);
 				int b = getValue(out, i + (d / 2), j - (d / 2));
 
 				int average = (l + t + r + b) / 4;
-				int random = Main.instance.getRandom().nextInt(2 * range) - range;
+				int random = Main.instance.getRandom().nextInt(upper + lower) - lower;
 				int value = average + random;
 
 				int midX = i + (d / 2);
@@ -132,6 +141,12 @@ public class FractalMap {
 	private static void setValue(int[][] values, int x, int y, int value) {
 		int width = values.length - 1;
 		int height = values[0].length - 1;
+
+		if (value < min)
+			value = min;
+
+		if (value > max)
+			value = max;
 
 		while (x < 0) {
 			x += width;

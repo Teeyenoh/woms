@@ -10,6 +10,8 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.ImageBuffer;
 
+import uk.co.quarklike.woms.Biome.BiomeType;
+
 public class Main implements Runnable {
 	public static final double FEMTO = Math.pow(10, -15);
 	public static final double PICO = Math.pow(10, -12);
@@ -22,8 +24,8 @@ public class Main implements Runnable {
 	public static final double TERA = Math.pow(10, 12);
 	public static final double PETA = Math.pow(10, 15);
 
-	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 600;
+	public static final int WINDOW_WIDTH = 513;
+	public static final int WINDOW_HEIGHT = 513;
 	public static final String TITLE = "The World on Michael's Skin";
 
 	public static Main instance;
@@ -111,8 +113,63 @@ public class Main implements Runnable {
 
 		for (int i = cameraX; i < cameraX + map.getWidth(); i++) {
 			for (int j = cameraY; j < cameraY + map.getHeight(); j++) {
-				if (i >= 0 && i < WINDOW_WIDTH && j >= 0 && j < WINDOW_HEIGHT)
-					canvas.setRGBA(i - cameraX, j - cameraY, map.getTile(i - cameraX, j - cameraY), map.getTile(i - cameraX, j - cameraY), map.getTile(i - cameraX, j - cameraY), 255);
+				if (i >= 0 && i < WINDOW_WIDTH && j >= 0 && j < WINDOW_HEIGHT) {
+					int height = map.getHeight(i - cameraX, j - cameraY);
+					int temp = map.getTemperature(i - cameraX, j - cameraY);
+					int rain = map.getRainfall(i - cameraX, j - cameraY);
+					int r = 0;
+					int g = 0;
+					int b = 0;
+
+					BiomeType biome = Biome.getBiome(height, temp, rain);
+
+					switch (biome) {
+					case OCEAN:
+						b = 127;
+						break;
+					case SEA:
+						b = 200;
+						break;
+					case SNOWSHEET:
+						r = 200;
+						g = 200;
+						b = 200;
+						break;
+					case ICESHEET:
+						r = 200;
+						g = 200;
+						b = 255;
+						break;
+					case GRASSLAND:
+						r = 150;
+						g = 220;
+						break;
+					case FOREST:
+						g = 63;
+						break;
+					case RAINFOREST:
+						g = 200;
+						r = 100;
+						b = 30;
+						break;
+					case MOUNTAINS:
+						r = g = b = 127;
+						break;
+					case COAST:
+						r = g = 63;
+						b = 255;
+						break;
+					case DESERT:
+						r = 255;
+						g = 200;
+						break;
+					default:
+						// none
+						break;
+					}
+
+					canvas.setRGBA(i - cameraX, j - cameraY, r, g, b, 255);
+				}
 			}
 		}
 
