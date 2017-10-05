@@ -24,8 +24,8 @@ public class Main implements Runnable {
 	public static final double TERA = Math.pow(10, 12);
 	public static final double PETA = Math.pow(10, 15);
 
-	public static final int WINDOW_WIDTH = 513;
-	public static final int WINDOW_HEIGHT = 513;
+	public static final int WINDOW_WIDTH = 512;
+	public static final int WINDOW_HEIGHT = 512;
 	public static final String TITLE = "The World on Michael's Skin";
 
 	public static Main instance;
@@ -72,7 +72,7 @@ public class Main implements Runnable {
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(-WINDOW_WIDTH / 2, WINDOW_WIDTH / 2, -WINDOW_HEIGHT / 2, WINDOW_HEIGHT / 2, 1, -1);
+		glOrtho((float) -WINDOW_WIDTH / 2, (float) WINDOW_WIDTH / 2, (float) -WINDOW_HEIGHT / 2, (float) WINDOW_HEIGHT / 2, 1, -1);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
@@ -81,6 +81,8 @@ public class Main implements Runnable {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		canvas = new ImageBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+		Biome.initBiomes();
 
 		map = new Map(513, 513);
 
@@ -125,43 +127,97 @@ public class Main implements Runnable {
 
 					switch (biome) {
 					case OCEAN:
-						b = 127;
+						r = 0;
+						g = 4;
+						b = 53;
 						break;
 					case SEA:
-						b = 200;
+						r = 18;
+						g = 28;
+						b = 140;
+						break;
+					case COAST:
+						r = 55;
+						g = 67;
+						b = 198;
 						break;
 					case SNOWSHEET:
-						r = 200;
-						g = 200;
-						b = 200;
+						r = 226;
+						g = 231;
+						b = 255;
 						break;
 					case ICESHEET:
-						r = 200;
-						g = 200;
+						r = 175;
+						g = 189;
 						b = 255;
 						break;
 					case GRASSLAND:
-						r = 150;
-						g = 220;
+						r = 149;
+						g = 168;
+						b = 8;
+						break;
+					case GRASSLAND_HILLS:
+						r = 131;
+						g = 140;
+						b = 65;
 						break;
 					case FOREST:
-						g = 63;
+						r = 26;
+						g = 66;
+						b = 5;
+						break;
+					case FOREST_HILLS:
+						r = 60;
+						g = 76;
+						b = 51;
 						break;
 					case RAINFOREST:
-						g = 200;
-						r = 100;
-						b = 30;
+						r = 38;
+						g = 119;
+						b = 4;
+						break;
+					case RAINFOREST_HILLS:
+						r = 72;
+						g = 124;
+						b = 49;
 						break;
 					case MOUNTAINS:
 						r = g = b = 127;
 						break;
-					case COAST:
-						r = g = 63;
+					case DESERT:
+						g = 255;
+						r = 246;
+						b = 142;
+						break;
+					case DESERT_HILLS:
+						g = 196;
+						r = 191;
+						b = 137;
+						break;
+					case TUNDRA_HILLS:
+						r = 170;
+						g = 170;
+						b = 235;
+						break;
+					case TUNDRA:
+						r = 200;
+						g = 200;
 						b = 255;
 						break;
-					case DESERT:
-						r = 255;
+					case SNOWY_TUNDRA:
+						r = 200;
 						g = 200;
+						b = 200;
+						break;
+					case SNOWY_TUNDRA_HILLS:
+						r = 170;
+						g = 170;
+						b = 170;
+						break;
+					case SWAMP:
+						r = 5;
+						g = 15;
+						b = 0;
 						break;
 					default:
 						// none

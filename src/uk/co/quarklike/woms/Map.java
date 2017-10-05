@@ -12,9 +12,9 @@ public class Map {
 	public Map(int width, int height) {
 		this.mapWidth = width;
 		this.mapHeight = height;
-		this.height = FractalMap.generateMap(width, -1000, 100, 1000, 0.5f);
-		this.temperature = FractalMap.generateMap(width, 260, 290, 330, 0.5f);
-		this.rainfall = FractalMap.generateMap(width, 0, 100, 2000, 0.5f);
+		this.height = FractalMap.generateMap(width, -10000, -5000, 200, 5000, 10000, 0.5f);
+		this.temperature = FractalMap.generateMap(width, 0, 230, 290, 350, 1000, 0.5f);
+		this.rainfall = FractalMap.generateMap(width, 0, 500, 1000, 1500, 5000, 0.5f);
 		this.entities = new ArrayList<Entity>();
 	}
 

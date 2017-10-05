@@ -3,12 +3,12 @@ package uk.co.quarklike.woms;
 public class FractalMap {
 	private static int max, min;
 
-	public static int[][] generateMap(int size, int min, int base, int max, float roughness) {
+	public static int[][] generateMap(int size, int hardMin, int min, int base, int max, int hardMax, float roughness) {
 		int width = size;
 		int height = size;
 
-		FractalMap.max = max;
-		FractalMap.min = min;
+		FractalMap.max = hardMax;
+		FractalMap.min = hardMin;
 
 		int[][] heights = new int[width][height];
 
@@ -18,9 +18,9 @@ public class FractalMap {
 			}
 		}
 
-		int lower = base - min;
-		int upper = max - base;
-		int passes = 8;
+		int lower = (base - min) / 2;
+		int upper = (max - base) / 2;
+		int passes = 9;
 
 		for (int i = 1; i <= passes; i++) {
 			heights = diamond(heights, size, i, lower, upper);
@@ -52,7 +52,6 @@ public class FractalMap {
 
 				int average = (tl + tr + br + bl) / 4;
 				int random = Main.instance.getRandom().nextInt(upper + lower) - lower;
-				System.out.println(random);
 				int value = average + random;
 
 				int midX = i + (d / 2);
