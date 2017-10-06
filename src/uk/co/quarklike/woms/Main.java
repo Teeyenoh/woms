@@ -10,8 +10,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.newdawn.slick.ImageBuffer;
 
-import uk.co.quarklike.woms.Biome.BiomeType;
-
 public class Main implements Runnable {
 	public static final double FEMTO = Math.pow(10, -15);
 	public static final double PICO = Math.pow(10, -12);
@@ -82,8 +80,6 @@ public class Main implements Runnable {
 
 		canvas = new ImageBuffer(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		Biome.initBiomes();
-
 		map = new Map(513, 513);
 
 		Entity e = new Entity("Test", 4);
@@ -123,108 +119,9 @@ public class Main implements Runnable {
 					int g = 0;
 					int b = 0;
 
-					BiomeType biome = Biome.getBiome(height, temp, rain);
+					Biome biome = Biome.getBiome(height, temp, rain);
 
-					switch (biome) {
-					case OCEAN:
-						r = 0;
-						g = 4;
-						b = 53;
-						break;
-					case SEA:
-						r = 18;
-						g = 28;
-						b = 140;
-						break;
-					case COAST:
-						r = 55;
-						g = 67;
-						b = 198;
-						break;
-					case SNOWSHEET:
-						r = 226;
-						g = 231;
-						b = 255;
-						break;
-					case ICESHEET:
-						r = 175;
-						g = 189;
-						b = 255;
-						break;
-					case GRASSLAND:
-						r = 149;
-						g = 168;
-						b = 8;
-						break;
-					case GRASSLAND_HILLS:
-						r = 131;
-						g = 140;
-						b = 65;
-						break;
-					case FOREST:
-						r = 26;
-						g = 66;
-						b = 5;
-						break;
-					case FOREST_HILLS:
-						r = 60;
-						g = 76;
-						b = 51;
-						break;
-					case RAINFOREST:
-						r = 38;
-						g = 119;
-						b = 4;
-						break;
-					case RAINFOREST_HILLS:
-						r = 72;
-						g = 124;
-						b = 49;
-						break;
-					case MOUNTAINS:
-						r = g = b = 127;
-						break;
-					case DESERT:
-						g = 255;
-						r = 246;
-						b = 142;
-						break;
-					case DESERT_HILLS:
-						g = 196;
-						r = 191;
-						b = 137;
-						break;
-					case TUNDRA_HILLS:
-						r = 170;
-						g = 170;
-						b = 235;
-						break;
-					case TUNDRA:
-						r = 200;
-						g = 200;
-						b = 255;
-						break;
-					case SNOWY_TUNDRA:
-						r = 200;
-						g = 200;
-						b = 200;
-						break;
-					case SNOWY_TUNDRA_HILLS:
-						r = 170;
-						g = 170;
-						b = 170;
-						break;
-					case SWAMP:
-						r = 5;
-						g = 15;
-						b = 0;
-						break;
-					default:
-						// none
-						break;
-					}
-
-					canvas.setRGBA(i - cameraX, j - cameraY, r, g, b, 255);
+					canvas.setRGBA(i - cameraX, j - cameraY, biome.getR(), biome.getG(), biome.getB(), 255);
 				}
 			}
 		}

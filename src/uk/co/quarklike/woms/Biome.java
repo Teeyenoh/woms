@@ -1,33 +1,6 @@
 package uk.co.quarklike.woms;
 
 public class Biome {
-	public enum BiomeType {
-		NULL, //
-		OCEAN, //
-		SEA, //
-		COAST, // -30m to 0m, any temp, any rainfall
-		ICESHEET, //
-		SNOWSHEET, //
-		TUNDRA, //
-		SNOWY_TUNDRA, //
-		TUNDRA_HILLS, //
-		SNOWY_TUNDRA_HILLS, //
-		TAIGA, // 0m to 600m, 285K to 313K, 850mm to 1500mm
-		TAIGA_HILLS, // 0m to 600m, 285K to 313K, 850mm to 1500mm
-		WASTELAND, //
-		BARREN_HILLS, //
-		GRASSLAND, // 0m to 600m, 285K to 313K, 550mm to 850mm
-		GRASSLAND_HILLS, // 0m to 600m, 285K to 313K, 550mm to 850mm
-		FOREST, // 0m to 600m, 285K to 313K, 850mm to 1500mm
-		FOREST_HILLS, // 0m to 600m, 285K to 313K, 850mm to 1500mm
-		SWAMP, //
-		DESERT, //
-		DESERT_HILLS, //
-		RAINFOREST, //
-		RAINFOREST_HILLS, //
-		MOUNTAINS, //
-	}
-
 	private static final int DEEP = 0; // below -1000
 	private static final int SHALLOW = 1; // below -300
 	private static final int VERY_SHALLOW = 2; // below 0
@@ -49,138 +22,66 @@ public class Biome {
 	private static final int VERY_WET = 4; // below 1000
 	private static final int SOAKED = 5;
 
-	private static BiomeType[][][] biomes;
+	private static Biome[][][] biomes = new Biome[6][6][6];
 
-	public static void initBiomes() {
-		biomes = new BiomeType[6][6][6];
+	private int r, g, b;
+	private String name;
 
-		for (int h = DEEP; h <= VERY_SHALLOW; h++) {
-			for (int t = FREEZING; t <= FREEZING; t++) {
-				for (int r = VERY_DRY; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.ICESHEET;
-				}
+	public static final Biome nullBiome = new Biome("Null", 0, 0, 0, DEEP, VERY_HIGH, FREEZING, SCORCHING, VERY_DRY, SOAKED);
+	public static final Biome ocean = new Biome("Ocean", 0, 4, 53, DEEP, DEEP, COLD, SCORCHING, VERY_DRY, SOAKED);
+	public static final Biome sea = new Biome("Sea", 18, 28, 140, SHALLOW, SHALLOW, COLD, SCORCHING, VERY_DRY, SOAKED);
+	public static final Biome coast = new Biome("Coast", 55, 67, 198, VERY_SHALLOW, VERY_SHALLOW, COLD, SCORCHING, VERY_DRY, SOAKED);
+	public static final Biome icesheet = new Biome("Icesheet", 175, 189, 255, DEEP, VERY_SHALLOW, FREEZING, FREEZING, VERY_DRY, DRY);
+	public static final Biome snowsheet = new Biome("Snowsheet", 226, 231, 255, DEEP, VERY_SHALLOW, FREEZING, FREEZING, NORMAL, SOAKED);
+	public static final Biome grassland = new Biome("Grassland", 149, 168, 8, LOW, LOW, TEMPERATE, WARM, NORMAL, NORMAL);
+	public static final Biome grassland_hills = new Biome("Grassland Hills", 131, 140, 65, HIGH, HIGH, TEMPERATE, WARM, NORMAL, NORMAL);
+	public static final Biome forest_deciduous = new Biome("Deciduous Forest", 26, 66, 5, LOW, LOW, TEMPERATE, WARM, WET, VERY_WET);
+	public static final Biome forest_deciduous_hills = new Biome("Deciduous Forest Hills", 60, 76, 51, HIGH, HIGH, TEMPERATE, WARM, WET, SOAKED);
+	public static final Biome forest_coniferous = new Biome("Coniferous Forest", 26, 66, 5, LOW, LOW, COLD, COLD, WET, VERY_WET);
+	public static final Biome forest_coniferous_hills = new Biome("Coniferous Forest Hills", 60, 76, 51, HIGH, HIGH, COLD, COLD, WET, SOAKED);
+	public static final Biome rainforest = new Biome("Rainforest", 38, 119, 4, LOW, LOW, HOT, SCORCHING, VERY_WET, SOAKED);
+	public static final Biome rainforest_hills = new Biome("Rainforest Hills", 72, 124, 49, HIGH, HIGH, HOT, SCORCHING, VERY_WET, SOAKED);
+	public static final Biome mountains = new Biome("Mountains", 127, 127, 127, VERY_HIGH, VERY_HIGH, FREEZING, SCORCHING, VERY_DRY, SOAKED);
+	public static final Biome savannah = new Biome("Savannah", 255, 0, 0, LOW, LOW, HOT, SCORCHING, NORMAL, WET);
+	public static final Biome desert = new Biome("Desert", 255, 246, 142, LOW, LOW, HOT, SCORCHING, VERY_DRY, DRY);
+	public static final Biome desert_hills = new Biome("Desert Hills", 196, 191, 137, HIGH, HIGH, HOT, SCORCHING, VERY_DRY, DRY);
+	public static final Biome tundra = new Biome("Tundra", 200, 200, 255, LOW, LOW, FREEZING, FREEZING, VERY_DRY, DRY);
+	public static final Biome tundra_hills = new Biome("Tundra Hills", 170, 170, 235, HIGH, HIGH, FREEZING, FREEZING, VERY_DRY, DRY);
+	public static final Biome tundra_snowy = new Biome("Snowy Tundra", 200, 200, 200, LOW, LOW, FREEZING, FREEZING, NORMAL, SOAKED);
+	public static final Biome tundra_snowy_hills = new Biome("Snowy Tundra Hills", 170, 170, 170, HIGH, HIGH, FREEZING, FREEZING, NORMAL, SOAKED);
+	public static final Biome swamp = new Biome("Swamp", 5, 15, 0, LOW, LOW, COLD, WARM, SOAKED, SOAKED);
 
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.SNOWSHEET;
-				}
-			}
-		}
+	public Biome(String name, int r, int g, int b, int minHeight, int maxHeight, int minTemp, int maxTemp, int minRain, int maxRain) {
+		this.r = r;
+		this.g = g;
+		this.b = b;
 
-		for (int h = DEEP; h <= DEEP; h++) {
-			for (int t = COLD; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.OCEAN;
-				}
-			}
-		}
-
-		for (int h = SHALLOW; h <= SHALLOW; h++) {
-			for (int t = COLD; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.SEA;
-				}
-			}
-		}
-
-		for (int h = VERY_SHALLOW; h <= VERY_SHALLOW; h++) {
-			for (int t = COLD; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.COAST;
-				}
-			}
-		}
-
-		for (int h = LOW; h <= LOW; h++) {
-			for (int t = FREEZING; t <= COLD; t++) {
-				for (int r = VERY_DRY; r <= DRY; r++) {
-					biomes[h][t][r] = BiomeType.TUNDRA;
-				}
-
-				for (int r = NORMAL; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.SNOWY_TUNDRA;
-				}
-
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.TAIGA;
-				}
-			}
-
-			for (int t = TEMPERATE; t <= WARM; t++) {
-				for (int r = VERY_DRY; r <= VERY_DRY; r++) {
-					biomes[h][t][r] = BiomeType.WASTELAND;
-				}
-
-				for (int r = DRY; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.GRASSLAND;
-				}
-
-				for (int r = WET; r <= WET; r++) {
-					biomes[h][t][r] = BiomeType.FOREST;
-				}
-
-				for (int r = VERY_WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.SWAMP;
-				}
-			}
-
-			for (int t = HOT; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.DESERT;
-				}
-
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.RAINFOREST;
+		for (int h = minHeight; h <= maxHeight; h++) {
+			for (int t = minTemp; t <= maxTemp; t++) {
+				for (int rain = minRain; rain <= maxRain; rain++) {
+					if (biomes[h][t][rain] != nullBiome) {
+						System.out.println("When adding biome " + name + ", found position " + h + " " + t + " " + rain + " to be filled by " + biomes[h][t][rain].getName());
+					}
+					biomes[h][t][rain] = this;
 				}
 			}
 		}
+	}
 
-		for (int h = HIGH; h <= HIGH; h++) {
-			for (int t = FREEZING; t <= COLD; t++) {
-				for (int r = VERY_DRY; r <= DRY; r++) {
-					biomes[h][t][r] = BiomeType.TUNDRA_HILLS;
-				}
+	public int getR() {
+		return r;
+	}
 
-				for (int r = NORMAL; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.SNOWY_TUNDRA_HILLS;
-				}
+	public int getG() {
+		return g;
+	}
 
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.TAIGA_HILLS;
-				}
-			}
+	public int getB() {
+		return b;
+	}
 
-			for (int t = TEMPERATE; t <= WARM; t++) {
-				for (int r = VERY_DRY; r <= VERY_DRY; r++) {
-					biomes[h][t][r] = BiomeType.BARREN_HILLS;
-				}
-
-				for (int r = DRY; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.GRASSLAND_HILLS;
-				}
-
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.FOREST_HILLS;
-				}
-			}
-
-			for (int t = HOT; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= NORMAL; r++) {
-					biomes[h][t][r] = BiomeType.DESERT_HILLS;
-				}
-
-				for (int r = WET; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.RAINFOREST_HILLS;
-				}
-			}
-		}
-
-		for (int h = VERY_HIGH; h <= VERY_HIGH; h++) {
-			for (int t = FREEZING; t <= SCORCHING; t++) {
-				for (int r = VERY_DRY; r <= SOAKED; r++) {
-					biomes[h][t][r] = BiomeType.MOUNTAINS;
-				}
-			}
-		}
+	public String getName() {
+		return name;
 	}
 
 	/**
@@ -193,13 +94,13 @@ public class Biome {
 	 *            in millimetres
 	 * @return
 	 */
-	public static BiomeType getBiome(int height, int temperature, int rainfall) {
+	public static Biome getBiome(int height, int temperature, int rainfall) {
 		int heightC = height < -1000 ? DEEP : height < -50 ? SHALLOW : height < 0 ? VERY_SHALLOW : height < 1000 ? LOW : height < 2000 ? HIGH : VERY_HIGH;
 		int tempC = temperature < 260 ? FREEZING : temperature < 280 ? COLD : temperature < 290 ? TEMPERATE : temperature < 310 ? WARM : temperature < 320 ? HOT : SCORCHING;
 		int rainC = rainfall < 250 ? VERY_DRY : rainfall < 500 ? DRY : rainfall < 500 ? NORMAL : rainfall < 1000 ? WET : rainfall < 2000 ? VERY_WET : SOAKED;
 
-		BiomeType type = biomes[heightC][tempC][rainC];
+		Biome type = biomes[heightC][tempC][rainC];
 
-		return type == null ? BiomeType.NULL : type;
+		return type == null ? nullBiome : type;
 	}
 }
